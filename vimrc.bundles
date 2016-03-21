@@ -1,0 +1,338 @@
+" Environment {
+
+    " Basics {
+        set nocompatible        " Must be first line
+        set background=dark     " Assume a dark background
+    " }
+
+    " Windows Compatible {
+        " On Windows, also use '.vim' instead of 'vimfiles'; this makes synchronization
+        " across (heterogeneous) systems easier.
+        if has('win32') || has('win64')
+          set runtimepath=$HOME/.vim,$VIM/vimfiles,$VIMRUNTIME,$VIM/vimfiles/after,$HOME/.vim/after
+
+          " Be nice and check for multi_byte even if the config requires
+          " multi_byte support most of the time
+          if has("multi_byte")
+            " Windows cmd.exe still uses cp850. If Windows ever moved to
+            " Powershell as the primary terminal, this would be utf-8
+            set termencoding=cp850
+            " Let Vim use utf-8 internally, because many scripts require this
+            set encoding=utf-8
+            setglobal fileencoding=utf-8
+            " Windows has traditionally used cp1252, so it's probably wise to
+            " fallback into cp1252 instead of eg. iso-8859-15.
+            " Newer Windows files might contain utf-8 or utf-16 LE so we might
+            " want to try them first.
+            set fileencodings=ucs-bom,utf-8,utf-16le,cp1252,iso-8859-15
+          endif
+        endif
+    " }
+
+    " Setup Bundle Support {
+        " The next three lines ensure that the ~/.vim/bundle/ system works
+        filetype off
+        set rtp+=~/.vim/bundle/vundle
+        call vundle#rc()
+    " }
+
+" }
+
+" Bundles {
+
+    " General scheme plugins {
+        Bundle 'Lokaltog/vim-powerline'
+        Bundle 'Yggdroot/indentLine'
+        Bundle 'https://github.com/tomasr/molokai.git'
+    " }
+
+    " General files search plugins {
+        Bundle 'gmarik/vundle'
+        Bundle 'scrooloose/nerdtree'
+        Bundle 'ctrlpvim/ctrlp.vim'
+        Bundle 'tacahiroy/ctrlp-funky'
+    " }
+
+    " General edition plugins {
+        Bundle 'godlygeek/tabular'
+        Bundle 'scrooloose/nerdcommenter'
+        Bundle 'mbbill/undotree'
+    " }
+
+
+    " General program plugins {
+        Bundle 'majutsushi/tagbar'
+    " }
+
+    " Snippets & AutoComplete {
+        Bundle 'Shougo/neocomplcache'
+        Bundle 'Shougo/neosnippet'
+        Bundle 'Shougo/neosnippet-snippets'
+        Bundle 'honza/vim-snippets'
+    " }
+
+    " Syntastic {
+        Bundle 'scrooloose/syntastic'
+    " }
+
+    " Cscove {
+        Bundle 'brookhong/cscope.vim'
+    " }
+
+    " Doxygen {
+        Bundle 'vim-scripts/DoxygenToolKit.vim'
+    " }
+
+    " Go Lang {
+        "Bundle 'Blackrush/vim-gocode'
+        "Bundle 'fatih/vim-go'
+    " }
+" }
+
+
+" Plugins configuration {
+
+    " Vim-powerline {
+        if isdirectory(expand("~/.vim/bundle/vim-powerline/"))
+            set laststatus=2
+            set encoding=utf-8
+            set t_Co=256
+            set guifont=PowerlineSymbols\ for\ Powerline
+        endif
+    " }
+
+    " Indentline {
+        if isdirectory(expand("~/.vim/bundle/indentLine/"))
+            map <Leader>il :IndentLinesToggle<CR>
+        endif
+    " }
+
+    " Molokai {
+        if isdirectory(expand("~/.vim/bundle/molokai/"))
+            colorscheme molokai
+        endif
+    " }
+
+    " NerdTree {
+        if isdirectory(expand("~/.vim/bundle/nerdtree"))
+            map <C-e> <plug>NERDTreeTabsToggle<CR>
+            map <leader>e :NERDTreeFind<CR>
+            nmap <leader>nt :NERDTreeFind<CR>
+
+            let NERDTreeShowBookmarks=1
+            let NERDTreeIgnore=['\.py[cd]$', '\~$', '\.swo$', '\.swp$', '^\.git$', '^\.hg$', '^\.svn$', '\.bzr$']
+            let NERDTreeChDirMode=0
+            let NERDTreeQuitOnOpen=1
+            let NERDTreeMouseMode=2
+            let NERDTreeShowHidden=1
+            let NERDTreeKeepTreeInNewTab=1
+            let g:nerdtree_tabs_open_on_gui_startup=0
+        endif
+    " }
+
+    " ctrlp {
+        if isdirectory(expand("~/.vim/bundle/ctrlp.vim/"))
+            let g:ctrlp_working_path_mode = 'ra'
+            nnoremap <silent> <D-t> :CtrlP<CR>
+            nnoremap <silent> <D-r> :CtrlPMRU<CR>
+            let g:ctrlp_custom_ignore = {
+                \ 'dir':  '\.git$\|\.hg$\|\.svn$',
+                \ 'file': '\.exe$\|\.so$\|\.dll$\|\.pyc$' }
+
+            " On Windows use "dir" as fallback command.
+            if WINDOWS()
+                let s:ctrlp_fallback = 'dir %s /-n /b /s /a-d'
+            elseif executable('ag')
+                let s:ctrlp_fallback = 'ag %s --nocolor -l -g ""'
+            elseif executable('ack-grep')
+                let s:ctrlp_fallback = 'ack-grep %s --nocolor -f'
+            elseif executable('ack')
+                let s:ctrlp_fallback = 'ack %s --nocolor -f'
+            else
+                let s:ctrlp_fallback = 'find %s -type f'
+            endif
+            if exists("g:ctrlp_user_command")
+                unlet g:ctrlp_user_command
+            endif
+            let g:ctrlp_user_command = {
+                \ 'types': {
+                    \ 1: ['.git', 'cd %s && git ls-files . --cached --exclude-standard --others'],
+                    \ 2: ['.hg', 'hg --cwd %s locate -I .'],
+                \ },
+                \ 'fallback': s:ctrlp_fallback
+            \ }
+
+            if isdirectory(expand("~/.vim/bundle/ctrlp-funky/"))
+                " CtrlP extensions
+                let g:ctrlp_extensions = ['funky']
+
+                "funky
+                nnoremap <Leader>fu :CtrlPFunky<Cr>
+            endif
+        endif
+    "}
+
+    " Tabularize {
+        if isdirectory(expand("~/.vim/bundle/tabular"))
+            nmap <Leader>a& :Tabularize /&<CR>
+            vmap <Leader>a& :Tabularize /&<CR>
+            nmap <Leader>a= :Tabularize /^[^=]*\zs=<CR>
+            vmap <Leader>a= :Tabularize /^[^=]*\zs=<CR>
+            nmap <Leader>a=> :Tabularize /=><CR>
+            vmap <Leader>a=> :Tabularize /=><CR>
+            nmap <Leader>a: :Tabularize /:<CR>
+            vmap <Leader>a: :Tabularize /:<CR>
+            nmap <Leader>a:: :Tabularize /:\zs<CR>
+            vmap <Leader>a:: :Tabularize /:\zs<CR>
+            nmap <Leader>a, :Tabularize /,<CR>
+            vmap <Leader>a, :Tabularize /,<CR>
+            nmap <Leader>a,, :Tabularize /,\zs<CR>
+            vmap <Leader>a,, :Tabularize /,\zs<CR>
+            nmap <Leader>a<Bar> :Tabularize /<Bar><CR>
+            vmap <Leader>a<Bar> :Tabularize /<Bar><CR>
+        endif
+    " }
+
+    " Nerdcommenter {
+
+    " }
+
+    " UndoTree {
+        if isdirectory(expand("~/.vim/bundle/undotree/"))
+            nnoremap <Leader>u :UndotreeToggle<CR>
+            " If undotree is opened, it is likely one wants to interact with it
+            let g:undotree_SetFocusWhenToggle=1
+        endif
+    " }
+
+    " TagBar {
+        if isdirectory(expand("~/.vim/bundle/tagbar/"))
+            nnoremap <silent> <leader>tt :TagbarToggle<CR>
+        endif
+    "}
+
+    " Neocomplcache {
+        " Use honza's snippets
+        let g:neosnippet#snippets_directory='~/.vim/bundle/vim-snippets/snippets'
+
+        " Enable neosnippet snipmate compatibility mode
+        let g:neosnippet#enable_snipmate_compatibility = 1
+
+        " Enable neosnippet when using go
+        let g:go_snippet_engine = "neosnippet"
+
+        " Disable the neosnippet preview candidate window
+        " When enabled, there can be to much visual noise
+        " especially when splits are used
+        set completeopt-=preview
+
+        let g:acp_enableAtStartup = 0
+        let g:neocomplcache_enable_at_startup = 1
+        let g:neocomplcache_enable_camel_case_completion = 1
+        let g:neocomplcache_enable_smart_case = 1
+        let g:neocomplcache_enable_underbar_completion = 1
+        let g:neocomplcache_enable_auto_delimiter = 1
+        let g:neocomplcache_max_list = 15
+        let g:neocomplcache_force_overwrite_completefunc = 1
+
+        " Define dictionary.
+        let g:neocomplcache_dictionary_filetype_lists = {
+                    \ 'default' : '',
+                    \ 'vimshell' : $HOME.'/.vimshell_hist',
+                    \ 'scheme' : $HOME.'/.gosh_completions'
+                    \ }
+
+        " Define keyword.
+        if !exists('g:neocomplcache_keyword_patterns')
+            let g:neocomplcache_keyword_patterns = {}
+        endif
+        let g:neocomplcache_keyword_patterns._ = '\h\w*'
+
+        " Plugin key-mappings {
+            " These two lines conflict with the default digraph mapping of <C-K>
+            imap <C-k> <Plug>(neosnippet_expand_or_jump)
+            smap <C-k> <Plug>(neosnippet_expand_or_jump)
+
+            imap <silent><expr><C-k> neosnippet#expandable() ? "\<Plug>(neosnippet_expand_or_jump)" : (pumvisible() ? "\<C-e>" : "\<Plug>(neosnippet_expand_or_jump)")
+            smap <TAB> <Right><Plug>(neosnippet_jump_or_expand)
+
+            inoremap <expr><C-g> neocomplcache#undo_completion()
+            inoremap <expr><C-l> neocomplcache#complete_common_string()
+            "inoremap <expr><CR> neocomplcache#complete_common_string()
+
+            function! CleverCr()
+                if pumvisible()
+                    if neosnippet#expandable()
+                        let exp = "\<Plug>(neosnippet_expand)"
+                        return exp . neocomplcache#close_popup()
+                    else
+                        return neocomplcache#close_popup()
+                    endif
+                else
+                    return "\<CR>"
+                endif
+            endfunction
+
+            " <CR> close popup and save indent or expand snippet
+            imap <expr> <CR> CleverCr()
+
+            " <CR>: close popup
+            " <s-CR>: close popup and save indent.
+            inoremap <expr><s-CR> pumvisible() ? neocomplcache#close_popup()."\<CR>" : "\<CR>"
+            "inoremap <expr><CR> pumvisible() ? neocomplcache#close_popup() : "\<CR>"
+
+            " <C-h>, <BS>: close popup and delete backword char.
+            inoremap <expr><BS> neocomplcache#smart_close_popup()."\<C-h>"
+            inoremap <expr><C-y> neocomplcache#close_popup()
+
+            " <TAB>: completion.
+            inoremap <expr><TAB> pumvisible() ? "\<C-n>" : "\<TAB>"
+            inoremap <expr><S-TAB> pumvisible() ? "\<C-p>" : "\<TAB>"
+        " }
+
+    " }
+
+    " Cscove {
+        if isdirectory(expand("~/.vim/bundle/cscope.vim/"))
+            nnoremap <leader>fa :call CscopeFindInteractive(expand('<cword>'))<CR>
+            nnoremap <leader>l :call ToggleLocationList()<CR>
+
+            " key mappings to search directly.
+            " s: Find this C symbol
+            nnoremap  <leader>fs :call CscopeFind('s', expand('<cword>'))<CR>
+            " g: Find this definition
+            nnoremap  <leader>fg :call CscopeFind('g', expand('<cword>'))<CR>
+            " d: Find functions called by this function
+            nnoremap  <leader>fd :call CscopeFind('d', expand('<cword>'))<CR>
+            " c: Find functions calling this function
+            nnoremap  <leader>fc :call CscopeFind('c', expand('<cword>'))<CR>
+            " t: Find this text string
+            nnoremap  <leader>ft :call CscopeFind('t', expand('<cword>'))<CR>
+            " e: Find this egrep pattern
+            nnoremap  <leader>fe :call CscopeFind('e', expand('<cword>'))<CR>
+            " f: Find this file
+            nnoremap  <leader>ff :call CscopeFind('f', expand('<cword>'))<CR>
+            " i: Find files #including this file
+            nnoremap  <leader>fi :call CscopeFind('i', expand('<cword>'))<CR>
+        endif
+    " }
+
+    " Doxygen {
+        if isdirectory(expand("~/.vim/bundle/DoxygenToolKit.vim/"))
+            let g:DoxygenToolkit_briefTag_pre="@Brief  "
+            let g:DoxygenToolkit_paramTag_pre="@Param  "
+            let g:DoxygenToolkit_returnTag_pre="@Return  "
+            let g:DoxygenToolkit_licenseTag="My own license"
+            let g:DoxygenToolkit_authorName="Wincent Lee"
+            map <leader>dx :Dox<CR>
+            map <leader>dxa :DoxAuthor<CR>
+            map <leader>dxb :DoxBlock<CR>
+        endif
+    " }
+
+    " End of configuration
+    filetype plugin indent on
+    filetype on
+    syntax on
+
+" }
